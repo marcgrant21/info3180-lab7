@@ -41,7 +41,7 @@ def uploads():
         filename = secure_filename(photoData.filename)
         try:
             photoData.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            return jsonify(message="200", filename=filename, description=description)
+            return jsonify(message="File Upload Successful", filename=filename, description=description)
         except Exception as e:
             print(e)
             return jsonify(errors=["internal Error"])
