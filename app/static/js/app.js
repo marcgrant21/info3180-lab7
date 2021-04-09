@@ -22,6 +22,9 @@ app.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item active">
+          <router-link class="nav-link" to="/upload">Upload</router-link>
+        </li>
         </ul>
       </div>
     </nav>
@@ -69,10 +72,74 @@ const NotFound = {
     }
 };
 
+const Upload = { name:"upload-form", 
+    template: `
+    <div>
+        <div v-if='messageFlag' >
+        
+            <div v-if="!errorFlag ">
+                <div class="alert alert-success" >
+                    {{ message }}
+                </div>
+            </div>
+            <div v-else >
+                <ul class="alert alert-danger">
+                    <li v-for="error in message">
+                        {{ error }}
+                    </li>
+                </ul>
+            </div>
+            
+        </div>
+        
+        <h1>Upload Form</h1>
+        <form id="uploadForm" @submit.prevent="uploadPhoto" enctype="multipart/form-data">
+            <label>Description:</label><br/>
+            <textarea name='description'></textarea><br/>
+            <label for='photo' class='btn btn-primary'>Browse....</label> <span>{{ filename }}</span>
+            <input id="photo" type="file" name='photo' style="display: none" v-on:change = "onFileSelected" /><br/>
+            <input type="submit" value="Upload" class="btn btn-success"/>
+        </form>
+    </div>
+    `,
+    methods: {
+        uploadPhoto: function(){
+            let self = this
+            let uploadForm = document.getElementById('uploadForm');
+            let form_data = new FormData(uploadForm);
+            
+            fetch("/api/upload", {
+                method: "POST",
+                body: form_data,
+                headers: {
+                    'X-CSRFToken': token
+                    },
+                credentials: 'same-origin'
+            }).then(function (response) {
+                return response.json();
+                })
+                .then(function (jsonResponse) {
+                // display a success/error message
+                console.log(jsonResponse);
+                })
+                .catch(function (error) {
+                console.error(error);
+                });
+        }
+        
+    },
+   
+};
+
+
+
+
+
 // Define Routes
 const routes = [
     { path: "/", component: Home },
     // Put other routes here
+    { path: "/upload", component: Upload },
 
     // This is a catch all route in case none of the above matches
     { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFound }
